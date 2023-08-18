@@ -36,6 +36,20 @@ class Buttons
         ]];
     }
 
+	public function list($id)
+	{
+		return [[
+			[
+				'text' => 'Completed',
+				'callback_data' => 'completedList__' . $id[0]
+			]
+//			, [
+//				'text' => 'Edit',
+//				'callback_data' => 'editList__' . $id[0]
+//			]
+		]];
+	}
+
     /*
     *******************
     *     DEFAULT     *

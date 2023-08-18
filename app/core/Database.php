@@ -13,7 +13,7 @@ class Database
     private function __construct()
     {
         $this->dbh = new PDO(
-            "mysql:dbname=" . DB_NAME . ";host=localhost;port=3306;charset=utf8",
+            "mysql:dbname=" . DB_NAME . ";host=" . DB_HOST . ";port=3306;charset=utf8",
             DB_USERNAME,
             DB_PASSWORD,
             [

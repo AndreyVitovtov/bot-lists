@@ -4,6 +4,7 @@ namespace App\Models;
 
 /**
  * @method static example()
+ * @method static list(int $listId)
  */
 class InlineButtons
 {
@@ -26,7 +27,7 @@ class InlineButtons
     }
 
     public static function custom(array $array, $numberPerLine = 1, string $callbackQuery = null, $textColumn = null,
-                                        $commandColumn = null, $paramColumn = null): array
+                                        $commandColumn = null, $paramColumn = null, $lastButtons = [], $edit = false): array
     {
         $buttons = [];
         foreach ($array as $item) {
@@ -57,6 +58,12 @@ class InlineButtons
                 'callback_data' => $command . $param
             ];
         }
+
+	    if(!empty($lastButtons)) {
+		    $buttons[] = $lastButtons;
+	    }
+
+		if($edit) return array_chunk($buttons, $numberPerLine);
 
         return (new InlineButtons)->replyMarkup(array_chunk($buttons, $numberPerLine), []);
     }
