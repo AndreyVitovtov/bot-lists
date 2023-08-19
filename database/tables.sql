@@ -35,10 +35,22 @@ CREATE TABLE `items`
 
 ALTER TABLE `items` RENAME `item`;
 
-ALTER TABLE `item` ADD CONSTRAINT `listidtitle` UNIQUE (`list_id`, `title`);
+ALTER TABLE `item`
+    ADD CONSTRAINT `listidtitle` UNIQUE (`list_id`, `title`);
 
-ALTER TABLE `item` ADD KEY `listid` (`list_id`);
+ALTER TABLE `item`
+    ADD KEY `listid` (`list_id`);
 
-ALTER TABLE `list` ADD KEY `chat` (`chat`);
+ALTER TABLE `list`
+    ADD KEY `chat` (`chat`);
 
-ALTER TABLE `interaction` ADD KEY `intchat` (`chat`);
+ALTER TABLE `interaction`
+    ADD KEY `intchat` (`chat`);
+
+ALTER TABLE `list`
+    ADD COLUMN `message_id` INT UNSIGNED;
+
+alter table list
+    collate = utf8mb4_unicode_ci;
+
+

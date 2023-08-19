@@ -75,7 +75,7 @@ trait MethodsFromGroupAndChat
 				break;
 			case 'editList':
 				$buttons = new Buttons();
-				echo $this->telegram->editMessageText(
+				$this->telegram->editMessageText(
 					$this->chat, $this->getMessageId(),
 					$this->stringListItems($id),
 					$buttons->listEdit($id)
@@ -108,7 +108,7 @@ trait MethodsFromGroupAndChat
 			case 'deleteItem':
 				$listInfo = $list->getListByItemId($id);
 				$list->deleteItem($id);
-				echo $this->telegram->editMessageText(
+				$this->telegram->editMessageText(
 					$this->chat,
 					$this->getMessageId(),
 					"<b>" . $listInfo['title'] . "</b>",
@@ -135,8 +135,9 @@ trait MethodsFromGroupAndChat
 				$messageId = $params['messageId'];
 				$listId = $params['listId'];
 				$list->addItem($listId,
-					trim(strtoupper(mb_strtoupper(
-							substr($this->getMessage(), 0, 1))) . substr($this->getMessage(), 1)));
+					trim(mb_strtoupper(
+							mb_substr($this->getMessage(), 0, 1, 'utf-8'), 'utf-8') . mb_substr(
+							$this->getMessage(), 1)));
 				$this->telegram->editMessageText(
 					$this->chat, $messageId,
 					$this->stringListItems($listId),
@@ -149,21 +150,28 @@ trait MethodsFromGroupAndChat
 
 	private function createList()
 	{
-		preg_match_all('/cl\s\((.+)\):(.+)/', strtolower($this->getMessage()), $matches);
-
-		$listTitle = trim($matches[1][0] ?? 'No title');
-		$items = $matches[2][0];
+		if (preg_match('/cl\s\((.+)\):(.+)/', $this->getMessage())) {
+			preg_match_all('/cl\s\((.+)\):(.+)/', strtolower($this->getMessage()), $matches);
+			$listTitle = trim($matches[1][0] ?? 'No title');
+			$listTitle = mb_strtoupper(
+					mb_substr($listTitle, 0, 1, 'utf-8'), 'utf-8') . mb_substr($listTitle, 1);
+			$items = $matches[2][0];
+		} elseif (preg_match('/cl:\s(.+)/', strtolower($this->getMessage()))) {
+			$listTitle = "List";
+			preg_match_all('/cl:\s(.+)/', strtolower($this->getMessage()), $matches);
+			$items = $matches[1][0];
+		}
 
 		$items = array_map(function ($v) {
 			$v = trim($v);
-			return strtoupper(mb_strtoupper(substr($v, 0, 1))) . substr($v, 1);
+			return mb_strtoupper(mb_substr($v, 0, 1, 'utf-8'), 'utf-8') . mb_substr($v, 1);
 		}, explode(',', $items));
 
 		$items = array_filter($items, function ($v) {
 			return !empty($v);
 		});
 
-		$items = array_unique($items);
+		$items = array_unique((array)$items);
 
 		$list = new Lists();
 		$listId = $list->addList($this->chat, $listTitle);
@@ -172,8 +180,7 @@ trait MethodsFromGroupAndChat
 			$list->addItem($listId, $item);
 		}
 
-		$res = $this->deleteIncomingMessage();
-		echo $res;
+		$this->deleteIncomingMessage();
 
 		$this->deleteMessage($this->getMessageId());
 
@@ -185,6 +192,8 @@ trait MethodsFromGroupAndChat
 		$list = new Lists();
 
 		$listTitle = $list->getList($listId)['title'];
+
+		if ($listTitle == 'List') $listTitle = "📃";
 
 		$items = $list->getItems($listId);
 
