@@ -150,8 +150,8 @@ trait MethodsFromGroupAndChat
 
 	private function createList()
 	{
-		if (preg_match('/cl\s\((.+)\):(.+)/', $this->getMessage())) {
-			preg_match_all('/cl\s\((.+)\):(.+)/', strtolower($this->getMessage()), $matches);
+		if (preg_match('/cl\s(.+):(.+)/', strtolower($this->getMessage()))) {
+			preg_match_all('/cl\s(.+):(.+)/', strtolower($this->getMessage()), $matches);
 			$listTitle = trim($matches[1][0] ?? 'No title');
 			$listTitle = mb_strtoupper(
 					mb_substr($listTitle, 0, 1, 'utf-8'), 'utf-8') . mb_substr($listTitle, 1);
