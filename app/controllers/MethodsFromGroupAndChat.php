@@ -33,11 +33,10 @@ trait MethodsFromGroupAndChat
 	{
 		$message = explode('__', $this->getMessage());
 
-		$command = $message[0];
-		$id = $message[1];
+		$command = trim($message[0]);
+		$id = trim($message[1]);
 
 		$list = new Lists();
-
 		switch ($command) {
 			case 'completedList':
 				$title = $list->getList($id)['title'];
@@ -76,7 +75,7 @@ trait MethodsFromGroupAndChat
 				break;
 			case 'editList':
 				$buttons = new Buttons();
-				$this->telegram->editMessageText(
+				echo $this->telegram->editMessageText(
 					$this->chat, $this->getMessageId(),
 					$this->stringListItems($id),
 					$buttons->listEdit($id)

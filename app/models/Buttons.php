@@ -41,11 +41,11 @@ class Buttons
 		return [[
 			[
 				'text' => '✔️ Mark',
-				'callback_data' => 'completedList__' . $id[0]
+				'callback_data' => 'completedList__' . (is_array($id) ? $id[0] : $id)
 			]
 			, [
 				'text' => '✏️ Edit',
-				'callback_data' => 'editList__' . $id[0]
+				'callback_data' => 'editList__' . (is_array($id) ? $id[0] : $id)
 			]
 		]];
 	}
@@ -55,16 +55,16 @@ class Buttons
 		return [[
 			[
 				'text' => '➕ Add',
-				'callback_data' => 'addItem__' . $id[0]
+				'callback_data' => 'addItem__' . (is_array($id) ? $id[0] : $id)
 			], [
 				'text' => '🗑️ Delete',
-				'callback_data' => 'deleteItems__' . $id[0]
+				'callback_data' => 'deleteItems__' . (is_array($id) ? $id[0] : $id)
 			]
 		],
 			[
 				[
 					'text' => '🔙',
-					'callback_data' => 'backList__' . $id[0]
+					'callback_data' => 'backList__' . (is_array($id) ? $id[0] : $id)
 				]
 			]
 		];
@@ -74,7 +74,7 @@ class Buttons
 	{
 		return [[[
 			'text' => '👌',
-			'callback_data' => 'completedItemsSave__' . $id[0]
+			'callback_data' => 'completedItemsSave__' . (is_array($id) ? $id[0] : $id)
 		]]];
 	}
 
