@@ -5,6 +5,7 @@ namespace App\Models;
 /**
  * @method static example()
  * @method static list(int $listId)
+ * @method static listEdit(mixed|string $id)
  */
 class InlineButtons
 {

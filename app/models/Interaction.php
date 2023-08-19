@@ -38,7 +38,7 @@ class Interaction
 
     public static function delete($chat)
     {
-        $stmt = self::$db->prepare("
+        $stmt = Database::instance()->getDbh()->prepare("
             DELETE FROM `interaction` 
             WHERE `chat` = :chat
         ");

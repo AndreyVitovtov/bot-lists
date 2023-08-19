@@ -2,7 +2,9 @@
 
 namespace App\Controllers;
 
+use App\Models\Buttons;
 use App\Models\InlineButtons;
+use App\Models\Interaction;
 use App\Models\Lists;
 
 trait MethodsFromGroupAndChat
@@ -38,61 +40,127 @@ trait MethodsFromGroupAndChat
 
 		switch ($command) {
 			case 'completedList':
-				$this->deleteMessage($this->getMessageId());
 				$title = $list->getList($id)['title'];
-				$this->send("<b>" . $title . "</b>\n\n", $this->buttonsListItems($id, 'completedItem', [
-					'text' => '👌 Ok',
-					'callback_data' => 'completedItemsSave__' . $id
-				]));
+				$this->telegram->editMessageText(
+					$this->chat, $this->getMessageId(),
+					"<b>" . $title . "</b>\n\n",
+					$this->buttonsListItems($id, 'completedItem', [
+						'text' => '👌',
+						'callback_data' => 'completedItemsSave__' . $id
+					], true)
+				);
 				break;
 			case 'completedItem':
-				$this->sendTyping();
 				$list->completed($id);
 				$listInfo = $list->getListByItemId($id);
-				$res = $this->telegram->editMessageText(
+				$this->telegram->editMessageText(
 					$this->chat,
 					$this->getMessageId(),
 					"<b>" . $listInfo['title'] . "</b>",
 					$this->buttonsListItems($listInfo['id'], 'completedItem', [
-						'text' => '👌 Ok',
+						'text' => '👌',
 						'callback_data' => 'completedItemsSave__' . $listInfo['id']
 					], true)
 				);
-				echo $res;
 				break;
+			case 'backList':
 			case 'completedItemsSave':
-				$this->deleteMessage($this->getMessageId());
-				$this->send($this->stringListItems($id), InlineButtons::list($id));
-
+				Interaction::delete($this->chat);
+				$buttons = new Buttons();
+				$this->telegram->editMessageText(
+					$this->chat,
+					$this->getMessageId(),
+					$this->stringListItems($id),
+					$buttons->list($id)
+				);
 				break;
 			case 'editList':
-				$this->send('In development');
+				$buttons = new Buttons();
+				$this->telegram->editMessageText(
+					$this->chat, $this->getMessageId(),
+					$this->stringListItems($id),
+					$buttons->listEdit($id)
+				);
+				break;
+			case 'addItem':
+				Interaction::set($this->chat, 'addItem', json_encode([
+					'messageId' => $this->getMessageId(),
+					'listId' => $id
+				]));
+				$buttons = new Buttons();
+				$this->telegram->editMessageText(
+					$this->chat, $this->getMessageId(),
+					$this->stringListItems($id),
+					$buttons->ok($id)
+				);
+				break;
+			case 'deleteItems':
+				$listInfo = $list->getList($id);
+				$this->telegram->editMessageText(
+					$this->chat,
+					$this->getMessageId(),
+					"<b>" . $listInfo['title'] . "</b>",
+					$this->buttonsListItems($id, 'deleteItem', [
+						'text' => '👌',
+						'callback_data' => 'completedItemsSave__' . $id
+					], true)
+				);
+				break;
+			case 'deleteItem':
+				$listInfo = $list->getListByItemId($id);
+				$list->deleteItem($id);
+				echo $this->telegram->editMessageText(
+					$this->chat,
+					$this->getMessageId(),
+					"<b>" . $listInfo['title'] . "</b>",
+					$this->buttonsListItems($listInfo['id'], 'deleteItem', [
+						'text' => '👌',
+						'callback_data' => 'completedItemsSave__' . $listInfo['id']
+					], true)
+				);
 				break;
 		}
 	}
 
 	public function groupAndChatUnknownTeam()
 	{
-		if (substr($this->getMessage(), 0, 10) == 'createlist') {
+		if (strtolower(substr($this->getMessage(), 0, 2)) == 'cl') {
 			$this->createList();
-		}
-//		else {
+		} else {
+			$interaction = Interaction::get($this->chat);
+			if (!empty($interaction) && $interaction['command'] == 'addItem') {
+				$this->deleteIncomingMessage();
+				$list = new Lists();
+				$buttons = new Buttons();
+				$params = json_decode($interaction['params'], true);
+				$messageId = $params['messageId'];
+				$listId = $params['listId'];
+				$list->addItem($listId,
+					trim(strtoupper(mb_strtoupper(
+							substr($this->getMessage(), 0, 1))) . substr($this->getMessage(), 1)));
+				$this->telegram->editMessageText(
+					$this->chat, $messageId,
+					$this->stringListItems($listId),
+					$buttons->ok($listId)
+				);
+			}
 //			$this->unknownTeam();
-//		}
+		}
 	}
 
 	private function createList()
 	{
-		preg_match_all('/createlist\s\((.+)\):(.+)/', $this->getMessage(), $matches);
+		preg_match_all('/cl\s\((.+)\):(.+)/', strtolower($this->getMessage()), $matches);
 
 		$listTitle = trim($matches[1][0] ?? 'No title');
 		$items = $matches[2][0];
 
 		$items = array_map(function ($v) {
-			return ucfirst(trim($v));
+			$v = trim($v);
+			return strtoupper(mb_strtoupper(substr($v, 0, 1))) . substr($v, 1);
 		}, explode(',', $items));
 
-		$items = array_filter($items, function($v) {
+		$items = array_filter($items, function ($v) {
 			return !empty($v);
 		});
 
@@ -105,7 +173,10 @@ trait MethodsFromGroupAndChat
 			$list->addItem($listId, $item);
 		}
 
-		$this->deleteIncomingMessage();
+		$res = $this->deleteIncomingMessage();
+		echo $res;
+
+		$this->deleteMessage($this->getMessageId());
 
 		$this->send($this->stringListItems($listId), InlineButtons::list($listId));
 	}
@@ -130,8 +201,12 @@ trait MethodsFromGroupAndChat
 		$list = new Lists();
 
 		$items = $list->getItems($listId);
-		$items = array_map(function ($v) {
-			$v['title'] = ($v['completed'] ? "☑️ " : "⬜ ") . $v['title'];
+		$items = array_map(function ($v) use ($callbackQuery) {
+			if ($callbackQuery == 'deleteItem') {
+				$v['title'] = "✖️ " . $v['title'];
+			} else {
+				$v['title'] = ($v['completed'] ? "☑️ " : "⬜ ") . $v['title'];
+			}
 			return $v;
 		}, $items);
 

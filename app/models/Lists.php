@@ -92,6 +92,7 @@ class Lists
 			SELECT * 
 			FROM `item`
 			WHERE `list_id` = :listId
+			ORDER BY `id`
 		");
 		$stmt->execute([
 			'listId' => $listId

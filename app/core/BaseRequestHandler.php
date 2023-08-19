@@ -65,7 +65,7 @@ class BaseRequestHandler
 
 	protected function deleteIncomingMessage()
 	{
-		$this->deleteMessage();
+		return $this->deleteMessage();
 	}
 
 	public function getTypeChat(): ?string
