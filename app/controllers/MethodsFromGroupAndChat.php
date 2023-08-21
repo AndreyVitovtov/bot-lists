@@ -124,7 +124,41 @@ trait MethodsFromGroupAndChat
 	public function groupAndChatUnknownTeam()
 	{
 		if (strtolower(substr($this->getMessage(), 0, 2)) == 'cl') {
-			$this->createList();
+            if (preg_match('/cl\s(.+):(.+)/', strtolower($this->getMessage()))) {
+                preg_match_all('/cl\s(.+):(.+)/', strtolower($this->getMessage()), $matches);
+                $listTitle = trim($matches[1][0] ?? 'No title');
+                $listTitle = mb_strtoupper(
+                        mb_substr($listTitle, 0, 1, 'utf-8'), 'utf-8') . mb_substr($listTitle, 1);
+                $items = $matches[2][0];
+            } elseif (preg_match('/cl:\s(.+)/', strtolower($this->getMessage()))) {
+                $listTitle = "List";
+                preg_match_all('/cl:\s(.+)/', strtolower($this->getMessage()), $matches);
+                $items = $matches[1][0];
+            }
+
+            $items = array_map(function ($v) {
+                $v = trim($v);
+                return mb_strtoupper(mb_substr($v, 0, 1, 'utf-8'), 'utf-8') . mb_substr($v, 1);
+            }, explode(',', $items));
+
+            $items = array_filter($items, function ($v) {
+                return !empty($v);
+            });
+
+            $items = array_unique((array)$items);
+
+            $list = new Lists();
+            $listId = $list->addList($this->chat, $listTitle);
+
+            foreach ($items as $item) {
+                $list->addItem($listId, $item);
+            }
+
+            $this->deleteIncomingMessage();
+
+            $this->deleteMessage($this->getMessageId());
+
+            $this->send($this->stringListItems($listId), InlineButtons::list($listId));
 		} else {
 			$interaction = Interaction::get($this->chat);
 			if (!empty($interaction) && $interaction['command'] == 'addItem') {
@@ -146,45 +180,6 @@ trait MethodsFromGroupAndChat
 			}
 //			$this->unknownTeam();
 		}
-	}
-
-	private function createList()
-	{
-		if (preg_match('/cl\s(.+):(.+)/', strtolower($this->getMessage()))) {
-			preg_match_all('/cl\s(.+):(.+)/', strtolower($this->getMessage()), $matches);
-			$listTitle = trim($matches[1][0] ?? 'No title');
-			$listTitle = mb_strtoupper(
-					mb_substr($listTitle, 0, 1, 'utf-8'), 'utf-8') . mb_substr($listTitle, 1);
-			$items = $matches[2][0];
-		} elseif (preg_match('/cl:\s(.+)/', strtolower($this->getMessage()))) {
-			$listTitle = "List";
-			preg_match_all('/cl:\s(.+)/', strtolower($this->getMessage()), $matches);
-			$items = $matches[1][0];
-		}
-
-		$items = array_map(function ($v) {
-			$v = trim($v);
-			return mb_strtoupper(mb_substr($v, 0, 1, 'utf-8'), 'utf-8') . mb_substr($v, 1);
-		}, explode(',', $items));
-
-		$items = array_filter($items, function ($v) {
-			return !empty($v);
-		});
-
-		$items = array_unique((array)$items);
-
-		$list = new Lists();
-		$listId = $list->addList($this->chat, $listTitle);
-
-		foreach ($items as $item) {
-			$list->addItem($listId, $item);
-		}
-
-		$this->deleteIncomingMessage();
-
-		$this->deleteMessage($this->getMessageId());
-
-		$this->send($this->stringListItems($listId), InlineButtons::list($listId));
 	}
 
 	private function stringListItems($listId)
