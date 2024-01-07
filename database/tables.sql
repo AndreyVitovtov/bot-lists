@@ -50,7 +50,8 @@ ALTER TABLE `interaction`
 ALTER TABLE `list`
     ADD COLUMN `message_id` INT UNSIGNED;
 
-alter table list
-    collate = utf8mb4_unicode_ci;
+ALTER TABLE `list`
+    COLLATE = 'utf8mb4_unicode_ci';
 
-
+ALTER TABLE `list`
+    ADD COLUMN `created` DATETIME DEFAULT CURRENT_TIMESTAMP;

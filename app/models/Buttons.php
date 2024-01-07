@@ -40,11 +40,11 @@ class Buttons
 	{
 		return [[
 			[
-				'text' => '✔️ Mark',
+				'text' => TEXTS['mark'],
 				'callback_data' => 'completedList__' . (is_array($id) ? $id[0] : $id)
 			]
 			, [
-				'text' => '✏️ Edit',
+				'text' => TEXTS['edit'],
 				'callback_data' => 'editList__' . (is_array($id) ? $id[0] : $id)
 			]
 		]];
@@ -54,10 +54,10 @@ class Buttons
 	{
 		return [[
 			[
-				'text' => '➕ Add',
+				'text' => TEXTS['add'],
 				'callback_data' => 'addItem__' . (is_array($id) ? $id[0] : $id)
 			], [
-				'text' => '🗑️ Delete',
+				'text' => TEXTS['delete'],
 				'callback_data' => 'deleteItems__' . (is_array($id) ? $id[0] : $id)
 			]
 		],
