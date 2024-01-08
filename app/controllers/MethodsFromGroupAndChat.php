@@ -118,6 +118,18 @@ trait MethodsFromGroupAndChat
 					], true)
 				);
 				break;
+			case 'editTitleList':
+				Interaction::set($this->chat, 'editTitleListSave', json_encode([
+					'messageId' => $this->getMessageId(),
+					'listId' => $id
+				]));
+				$buttons = new Buttons();
+				$this->telegram->editMessageText(
+					$this->chat, $this->getMessageId(),
+					$this->stringListItems($id),
+					$buttons->back($id)
+				);
+				break;
 		}
 	}
 
@@ -176,6 +188,19 @@ trait MethodsFromGroupAndChat
 					$this->chat, $messageId,
 					$this->stringListItems($listId),
 					$buttons->ok($listId)
+				);
+			} elseif (!empty($interaction) && $interaction['command'] == 'editTitleListSave') {
+				$this->deleteIncomingMessage();
+				$buttons = new Buttons();
+				$params = json_decode($interaction['params'], true);
+				$listId = $params['listId'];
+				$list = new Lists();
+				$list->updateTitle($listId, trim($this->getMessage()));
+				$this->telegram->editMessageText(
+					$this->chat,
+					$params['messageId'],
+					$this->stringListItems($listId),
+					$buttons->list($listId)
 				);
 			}
 //			$this->unknownTeam();

@@ -114,4 +114,17 @@ class Lists
 		]);
 		return $stmt->fetchAll()[0] ?? [];
 	}
+
+	public function updateTitle($id, $title)
+	{
+		$stmt = $this->db->prepare("
+			UPDATE `list`
+			SET `title` = :title
+			WHERE `id` = :id
+		");
+		$stmt->execute([
+			'id' => $id,
+			'title' => $title
+		]);
+	}
 }

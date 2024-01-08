@@ -63,6 +63,12 @@ class Buttons
 		],
 			[
 				[
+					'text' => TEXTS['editTitleList'],
+					'callback_data' => 'editTitleList__' . (is_array($id) ? $id[0] : $id)
+				]
+			],
+			[
+				[
 					'text' => '🔙',
 					'callback_data' => 'backList__' . (is_array($id) ? $id[0] : $id)
 				]
@@ -75,6 +81,14 @@ class Buttons
 		return [[[
 			'text' => '👌',
 			'callback_data' => 'completedItemsSave__' . (is_array($id) ? $id[0] : $id)
+		]]];
+	}
+
+	public function back($id)
+	{
+		return [[[
+			'text' => '🔙',
+			'callback_data' => 'backList__' . (is_array($id) ? $id[0] : $id)
 		]]];
 	}
 

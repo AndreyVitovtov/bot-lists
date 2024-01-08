@@ -10,7 +10,8 @@ if (isset($_REQUEST['language'])) {
 		'mark' => '✔️ Mark',
 		'edit' => '✏️ Edit',
 		'add' => '➕ Add',
-		'delete' => '🗑️ Delete'
+		'delete' => '🗑️ Delete',
+		'editTitleList' => '📃 Edit title list'
 	]);
 } else {
 	define('LANG', 'UA');
@@ -18,7 +19,8 @@ if (isset($_REQUEST['language'])) {
 		'mark' => '✔️ Відмітити',
 		'edit' => '✏️ Редагувати',
 		'add' => '➕ Додати',
-		'delete' => '🗑️ Видалити'
+		'delete' => '🗑️ Видалити',
+		'editTitleList' => '📃 Змінити назву списку'
 	]);
 }
 
