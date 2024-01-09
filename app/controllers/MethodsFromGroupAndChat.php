@@ -39,6 +39,7 @@ trait MethodsFromGroupAndChat
 		$list = new Lists();
 		switch ($command) {
 			case 'completedList':
+				$this->answerCallbackQuery('completedList', [], false);
 				$title = $list->getList($id)['title'];
 				$this->telegram->editMessageText(
 					$this->chat, $this->getMessageId(),
@@ -82,6 +83,7 @@ trait MethodsFromGroupAndChat
 				);
 				break;
 			case 'addItem':
+				$this->answerCallbackQuery('sendItemList', [], false);
 				Interaction::set($this->chat, 'addItem', json_encode([
 					'messageId' => $this->getMessageId(),
 					'listId' => $id
@@ -94,6 +96,7 @@ trait MethodsFromGroupAndChat
 				);
 				break;
 			case 'deleteItems':
+				$this->answerCallbackQuery('deleteItem', [], false);
 				$listInfo = $list->getList($id);
 				$this->telegram->editMessageText(
 					$this->chat,
@@ -119,6 +122,7 @@ trait MethodsFromGroupAndChat
 				);
 				break;
 			case 'editTitleList':
+				$this->answerCallbackQuery('sendNewNameList', [], false);
 				Interaction::set($this->chat, 'editTitleListSave', json_encode([
 					'messageId' => $this->getMessageId(),
 					'listId' => $id
@@ -136,6 +140,7 @@ trait MethodsFromGroupAndChat
 	public function groupAndChatUnknownTeam()
 	{
 		if (strtolower(substr($this->getMessage(), 0, 2)) == 'cl') {
+			$this->sendTyping();
             if (preg_match('/cl\s(.+):(.+)/', strtolower($this->getMessage()))) {
                 preg_match_all('/cl\s(.+):(.+)/', strtolower($this->getMessage()), $matches);
                 $listTitle = trim($matches[1][0] ?? 'No title');

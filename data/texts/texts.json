@@ -1,5 +1,9 @@
 {
   "greeting": "Приветствие",
   "unknownTeam": "Неизвестная команда",
-  "example": "Hello world"
+  "example": "Hello world",
+  "sendNewNameList": "Відправте нову назву списку",
+  "sendItemList": "Кожен пункт списку окремо і натисніть \uD83D\uDC4C",
+  "completedList": "Поставте, або зніміть позначку і натисніть \uD83D\uDC4C",
+  "deleteItem": "Видаліть пункти і натисніть \uD83D\uDC4C"
 }
