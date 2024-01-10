@@ -207,6 +207,9 @@ trait MethodsFromGroupAndChat
 					$this->stringListItems($listId),
 					$buttons->list($listId)
 				);
+			} elseif(in_array($this->getMessage(), ['/add_list@ListsBot', '/add_list', 'add_list', 'how_to_add_list', '/how_to_add_list'])) {
+				$this->deleteMessage();
+				$this->send("Щоб додати список, надішліть:\n`cl Назва списку: пункт1, пункт2`\nабо\n`cl: пункт1, пункт2`", [], 'Markdown');
 			}
 //			$this->unknownTeam();
 		}
